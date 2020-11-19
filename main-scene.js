@@ -154,19 +154,35 @@ export class House extends Scene {                           // **Obj_File_Demo*
         };
 
         // Don't create any DOM elements to control this scene:
-        this.widget_options = {make_controls: false};
+        //this.widget_options = {make_controls: false};
 
     }
 
-    display(context, program_state) {
-        super.display(context, program_state);
-        let model_transform = Mat4.identity();
-        model_transform = model_transform.times(Mat4.scale(2,2,2));
+    make_control_panel() {
+        // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
+        //this.key_triggered_button("", ["c"], );
+        //this.key_triggered_button("", ["o"], () => {
+        //});
+    }
 
+    display(context, program_state) {
+        // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
         let camera_matrix = Mat4.identity().times(Mat4.translation(1,0,-5))
             .times(Mat4.rotation(-45.25*Math.PI/2, 0, 1, 0))
             .times(Mat4.translation( -.8, 0, 0));
-        program_state.set_camera(camera_matrix);// Locate the camera here (inverted matrix).
+
+        if (!context.scratchpad.controls) {
+            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
+            // Define the global camera and projection matrices, which are stored in program_state.
+            program_state.set_camera(camera_matrix);
+        }
+
+        program_state.projection_transform = Mat4.perspective(
+            Math.PI / 4, context.width / context.height, .1, 1000);
+
+        super.display(context, program_state);
+        let model_transform = Mat4.identity();
+        model_transform = model_transform.times(Mat4.scale(2,2,2));
 
         const t = program_state.animation_time;
 
