@@ -130,7 +130,8 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
     constructor() {
         super();
         // Load the model file:
-        this.shapes = {"plane": new Shape_From_File("assets/Plane.obj")
+        this.shapes = {"plane": new Shape_From_File("assets/plane1.obj"),
+            plane2: new defs.Square()
         };
 
         this.materials = {
@@ -153,11 +154,11 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
     display(context, program_state) {
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
 
-        let camera_matrix_plane = Mat4.identity().times(Mat4.translation(0,0,-2.0));
-        let model_transform_plane = Mat4.identity().times(Mat4.rotation(89.5,1,0,0));
+        let camera_matrix_plane = Mat4.identity().times(Mat4.translation(0,0,-3.0));
+        let model_transform_plane = Mat4.identity();
         //LIGHTING
-        const light_position_plane = vec4(0, 0, 5, 1);
-        program_state.lights = [new Light(light_position_plane, color(1, 1, 1, 1), 10000)];
+        const light_position_plane = vec4(0, 5, 5, 1);
+        program_state.lights = [new Light(light_position_plane, color(1, 1, 1, 1), 1000)];
 
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
@@ -169,6 +170,6 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
             Math.PI / 4, context.width / context.height, .1, 1000);
 
 
-        this.shapes.plane.draw(context, program_state, model_transform_plane, this.materials.plane);
+        this.shapes.plane2.draw(context, program_state, model_transform_plane, this.materials.plane);
     }
 }
