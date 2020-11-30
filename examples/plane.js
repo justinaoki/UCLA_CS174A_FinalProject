@@ -136,7 +136,7 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
 
         this.materials = {
             plane: new Material(new defs.Phong_Shader(),
-                {ambient: .3, diffusity: .5, color: color(1,1,1,1)}),
+                {ambient: .3, diffusity: .5, specularity: .7, color: color(1,1,1,1)}),
         };
 
         // Don't create any DOM elements to control this scene:
@@ -154,11 +154,22 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
     display(context, program_state) {
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
 
+<<<<<<< Updated upstream
         let camera_matrix_plane = Mat4.identity().times(Mat4.translation(0,0,-3.0));
         let model_transform_plane = Mat4.identity();
         //LIGHTING
         const light_position_plane = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_position_plane, color(1, 1, 1, 1), 1000)];
+=======
+        let camera_matrix_plane = Mat4.identity().times(Mat4.translation(0,0,-2.0));
+        let model_transform_plane = Mat4.identity().times(Mat4.rotation(89.5,1,0,0)).times(Mat4.rotation(100,1,0, 0));
+        //LIGHTING
+        const light_position_plane = vec4(0, 0, 5, 1);
+        //program_state.lights = [new Light(light_position_plane, color(1, 1, 1, 1), 10000)];
+        const t = program_state.animation_time;
+
+        program_state.lights = [new Light(Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(3, 2, 10, 1)), color(1, 1, 1, 1), 100000)];
+>>>>>>> Stashed changes
 
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
