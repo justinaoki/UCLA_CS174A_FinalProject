@@ -137,6 +137,23 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
         this.materials = {
             plane: new Material(new defs.Phong_Shader(),
                 {ambient: .3, diffusity: .5, color: color(1,1,1,1)}),
+            stars: new Material(new defs.Textured_Phong(1), {
+                //color: color(.5, .5, .5, 1),
+                ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture("assets/stars.png")}),
+            bump: new Material(new defs.Bump(),
+                {ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture("assets/stars.png")}),
+
+            brick: new Material(new defs.Textured_Phong(1), {
+                ambient: .3, diffusivity: .7, texture: new Texture("assets/BrickColor.png")}),
+
+            bumpBrick: new Material(new defs.Bump(),
+                {ambient: .3, diffusivity: .7, texture: new Texture("assets/BrickColor.png")}),
+
+            grass: new Material(new defs.Textured_Phong(1), {
+                ambient: .3, diffusivity: .7, texture: new Texture("assets/GrassColor.png")}),
+
+            bumpGrass: new Material(new defs.Bump(),
+                {ambient: .3, diffusivity: .7, texture: new Texture("assets/GrassColor.png")}),
         };
 
         // Don't create any DOM elements to control this scene:
@@ -154,11 +171,11 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
     display(context, program_state) {
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
 
-        let camera_matrix_plane = Mat4.identity().times(Mat4.translation(0,0,-3.0));
+        let camera_matrix_plane = Mat4.identity().times(Mat4.translation(0,0,-5.0));
         let model_transform_plane = Mat4.identity();
         //LIGHTING
-        const light_position_plane = vec4(0, 5, 5, 1);
-        program_state.lights = [new Light(light_position_plane, color(1, 1, 1, 1), 1000)];
+        const light_position_plane = vec4(0, 0, 10, 1);
+        program_state.lights = [new Light(light_position_plane, color(1, 1, 1, 1), 100)];
 
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
@@ -169,7 +186,10 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
 
+        model_transform_plane = model_transform_plane.times(Mat4.translation(-0.5,0,0));
+        this.shapes.plane2.draw(context, program_state, model_transform_plane, this.materials.bumpBrick);
 
-        this.shapes.plane2.draw(context, program_state, model_transform_plane, this.materials.plane);
+        model_transform_plane = model_transform_plane.times(Mat4.translation(2,0,0));
+        this.shapes.plane2.draw(context,program_state, model_transform_plane, this.materials.brick);
     }
 }
