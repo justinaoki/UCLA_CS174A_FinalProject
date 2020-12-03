@@ -133,6 +133,7 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
         this.shapes = {"plane": new Shape_From_File("assets/plane1.obj"),
             plane2: new defs.Square()
         };
+        this.shapes.plane2.arrays.texture_coord.forEach(v => v.scale_by(2));
 
         this.materials = {
             plane: new Material(new defs.Phong_Shader(),
@@ -143,7 +144,7 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
             bump: new Material(new defs.Bump(),
                 {ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture("assets/stars.png")}),
 
-            brick: new Material(new defs.Textured_Phong(1), {
+            brick: new Material(new defs.Textured_Phong(), {
                 ambient: .3, diffusivity: .7, texture: new Texture("assets/BrickColor.png")}),
 
             bumpBrick: new Material(new defs.Bump(),
@@ -166,6 +167,16 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
         //this.key_triggered_button("", ["c"], );
         //this.key_triggered_button("", ["o"], () => {
         //});
+        this.key_triggered_button("Pause", ["c"], () => {}
+            ,"#87cefa" );
+        this.new_line();
+        this.key_triggered_button("-", ["a"], () => {}
+        ,"#0000ff" );
+        this.live_string(box => {
+            box.textContent = "|    Time:    |"
+        }, );
+        this.key_triggered_button("+", ["b"], () => {}
+            ,"#0000ff" );
     }
 
     display(context, program_state) {
