@@ -130,7 +130,7 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
     constructor() {
         super();
         // Load the model file:
-        this.shapes = {"plane": new Shape_From_File("assets/plane1.obj"),
+        this.shapes = {
             plane2: new defs.Square()
         };
         this.shapes.plane2.arrays.texture_coord.forEach(v => v.scale_by(2));
@@ -148,7 +148,7 @@ export class Plane extends Scene {                           // **Obj_File_Demo*
                 ambient: .3, diffusivity: .7, texture: new Texture("assets/BrickColor.png")}),
 
             bumpBrick: new Material(new defs.Bump(),
-                {ambient: .3, diffusivity: .7, texture: new Texture("assets/BrickColor.png")}),
+                {ambient: .3, diffusivity: .7, texture: new Texture("assets/BrickColor.png"), texture2: new Texture("assets/BrickNormal.png")}),
 
             grass: new Material(new defs.Textured_Phong(1), {
                 ambient: .3, diffusivity: .7, texture: new Texture("assets/GrassColor.png")}),
