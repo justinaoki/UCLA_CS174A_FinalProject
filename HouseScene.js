@@ -4,6 +4,7 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4, Light, Shape, Material, Shader, Texture, Scene,
     Canvas_Widget, Code_Widget, Text_Widget
 } = tiny;
+const {Cube, Axis_Arrows, Textured_Phong, Triangle, Phong_Shader} = defs
 
 const Minimal_Webgl_Demo = defs.Minimal_Webgl_Demo;
 
@@ -108,6 +109,84 @@ export class Shape_From_File extends Shape {                                   /
     }
 }
 
+const particles = defs.particles =
+    class particles extends Shape {
+
+        constructor(num_particles) {
+            super("position", "normal", "texture_coord", "offset");
+            for(let i = 0; i < num_particles; i++){
+                defs.Square.insert_transformed_copy_into(this, [9], Mat4.identity());
+            }
+            const offsets = Array(num_particles).fill(0).map(x=>vec3(0,0,0).randomized(50));
+            this.arrays.offset = this.arrays.position.map((x, i)=> offsets[~~(i/4)]);
+        }
+    }
+
+const Particle_Phong = defs.Particle_Phong =
+    class Particle_Phong extends Phong_Shader {
+        // **Textured_Phong** is a Phong Shader extended to addditionally decal a
+        // texture image over the drawn shape, lined up according to the texture
+        // coordinates that are stored at each shape vertex.
+        vertex_glsl_code() {
+            // ********* VERTEX SHADER *********
+            return this.shared_glsl_code() + `
+                varying vec2 f_tex_coord;
+                attribute vec3 position, normal, offset;
+                                         
+                // Position is expressed in object coordinates.
+                attribute vec2 texture_coord;
+                
+                uniform mat4 model_transform;
+                uniform mat4 projection_camera_model_transform;
+        
+                void main(){   
+                    vec3 temp = offset;
+                    temp[2] = mod(temp[2], 4.0)+5.0;                                                                
+                    // The vertex's final resting place (in NDCS):
+                    gl_Position = projection_camera_model_transform * vec4( position+temp, 1.0 );
+                    // The final normal vector in screen space.
+                    N = normalize( mat3( model_transform ) * normal / squared_scale);
+                    vertex_worldspace = ( model_transform * vec4( position, 1.0 ) ).xyz;
+                    // Turn the per-vertex texture coordinate into an interpolated variable.
+                    f_tex_coord = texture_coord;
+                  } `;
+        }
+
+        fragment_glsl_code() {
+            // ********* FRAGMENT SHADER *********
+            // A fragment is a pixel that's overlapped by the current triangle.
+            // Fragments affect the final image or get discarded due to depth.
+            return this.shared_glsl_code() + `
+                varying vec2 f_tex_coord;
+                uniform sampler2D texture;
+                uniform float animation_time;
+                
+                void main(){
+                    // Sample the texture image in the correct place:
+                    vec4 tex_color = vec4(0.01/(distance(f_tex_coord, vec2(.5,.5)))-0.2);
+                    if( tex_color.w < .01 ) discard;
+                                                                             // Compute an initial (ambient) color:
+                    gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                                                                             // Compute the final color with contributions from lights:
+                    gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
+                  } `;
+        }
+
+        update_GPU(context, gpu_addresses, gpu_state, model_transform, material) {
+            // update_GPU(): Add a little more to the base class's version of this method.
+            super.update_GPU(context, gpu_addresses, gpu_state, model_transform, material);
+            // Updated for assignment 4
+            context.uniform1f(gpu_addresses.animation_time, gpu_state.animation_time / 1000);
+            if (material.texture && material.texture.ready) {
+                // Select texture unit 0 for the fragment shader Sampler2D uniform called "texture":
+                context.uniform1i(gpu_addresses.texture, 0);
+                // For this draw, use the texture image from correct the GPU buffer:
+                material.texture.activate(context);
+            }
+        }
+    }
+
+
 export class HouseScene extends Scene {                           // **Obj_File_Demo** show how to load a single 3D model from an OBJ file.
     // Detailed model files can be used in place of simpler primitive-based
     // shapes to add complexity to a scene.  Simpler primitives in your scene
@@ -118,18 +197,25 @@ export class HouseScene extends Scene {                           // **Obj_File_
     constructor() {
         super();
         // Load the model file:
+        this.num_particles = 1024;
         this.shapes = {
             "house": new Shape_From_File("assets/House.obj"),
             "ground": new Shape_From_File("assets/Ground.obj"),
             "bush": new Shape_From_File("assets/Bush.obj"),
             "leaves": new Shape_From_File("assets/Leaves.obj"),
             "trunk": new Shape_From_File("assets/Trunk.obj"),
-            "stepstones": new Shape_From_File("assets/StepStones.obj")
+            "stepstones": new Shape_From_File("assets/StepStones.obj"),
+            particles: new particles(this.num_particles)
         };
 
         this.materials = {
             house: new Material(new defs.Phong_Shader(),
                 {ambient: .3, diffusity: .5, color: color(1, 1, 1, 1)}),
+            particles: new Material(new Particle_Phong(), {
+                color: color(1,1,1,1),
+                ambient: .5, diffusity: 0.1, specularity: 0.1,
+                texture: new Texture("assets/stars.png")
+            })
         };
 
         // Don't create any DOM elements to control this scene:
@@ -142,6 +228,18 @@ export class HouseScene extends Scene {                           // **Obj_File_
         //this.key_triggered_button("", ["c"], );
         //this.key_triggered_button("", ["o"], () => {
         //});
+        this.key_triggered_button("Pause", ["c"], () => {
+            this.Pause^=true;
+            }
+            ,"#87cefa" );
+        this.new_line();
+        this.key_triggered_button("-", ["a"], () => {}
+            ,"#0000ff" );
+        this.live_string(box => {
+            box.textContent = "|    Time:    |"
+        }, );
+        this.key_triggered_button("+", ["b"], () => {}
+            ,"#0000ff" );
     }
 
     display(context, program_state) {
@@ -163,6 +261,11 @@ export class HouseScene extends Scene {                           // **Obj_File_
         model_transform = model_transform.times(Mat4.scale(1.5, 1.5, 1.5));
 
         const t = program_state.animation_time;
+        let time = t/1000;
+
+        if(this.Pause){
+            time = 0;
+        }
 
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
         // A spinning light to show off the bump map:
@@ -201,6 +304,16 @@ export class HouseScene extends Scene {                           // **Obj_File_
         let stepstones_transform = model_transform.times(Mat4.translation(1.5,-.58,0))
             .times(Mat4.scale(.3, .3, .3));
         this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.house);
+
+        //stars
+        let particle_model_transform = Mat4.identity()
+            .times(Mat4.rotation(-45 * Math.PI / 2, 0, 1, 0))
+            .times(Mat4.rotation(time, 0, 0, 1));
+
+        const offsets = Array(this.num_particles).fill(0).map(x=>vec3(0,0,0).randomized(.01));
+        this.shapes.particles.arrays.offset = this.shapes.particles.arrays.offset.map((x, i)=> x.plus(offsets[~~(i/4)]));
+        this.shapes.particles.draw(context, program_state, particle_model_transform, this.materials.particles);
+        this.shapes.particles.copy_onto_graphics_card(context.context, ["offset"], false);
 
     }
 }
