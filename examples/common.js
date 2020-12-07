@@ -881,8 +881,9 @@ const Bump = defs.Bump =
                     vec4 tex2_color = texture2D(texture2, f_tex_coord);
                     vec4 tex_color = texture2D(texture, f_tex_coord);
                     //if( tex_color.w < .01 ) discard;
-                    
-                    vec3 bumpN = normalize(N) + tex2_color.rgb - .5*vec3(1,1,1);
+                    float normal_scale = 0.0;
+                    normal_scale = 1.0 - normal_scale; //inverting
+                    vec3 bumpN = normal_scale*normalize(N) + tex2_color.rgb - .5*vec3(1,1,1);
                                                                            // Compute an initial (ambient) color:
                     gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                                                                              // Compute the final color with contributions from lights:
