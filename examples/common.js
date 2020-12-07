@@ -893,17 +893,17 @@ const Bump = defs.Bump =
             // update_GPU(): Add a little more to the base class's version of this method.
             super.update_GPU(context, gpu_addresses, gpu_state, model_transform, material);
 
-            if (material.texture && material.texture.ready) {
+            //if (material.texture && material.texture.ready) {
                 // Select texture unit 0 for the fragment shader Sampler2D uniform called "texture":
                 context.uniform1i(gpu_addresses.texture, 0);
                 // For this draw, use the texture image from correct the GPU buffer:
                 material.texture.activate(context, 0);
-                if(material.texture2){
+                //if(material.texture2){
                     context.uniform1i(gpu_addresses.texture2, 1);
                     material.texture2.activate(context, 1);
 
-                }
-            }
+                //}
+            //}
         }
     }
 
