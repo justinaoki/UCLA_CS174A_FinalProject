@@ -2,7 +2,7 @@ import {defs, tiny} from './examples/common.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4, Light, Shape, Material, Shader, Texture, Scene,
-    Canvas_Widget, Code_Widget, Text_Widget
+    Canvas_Widget, Code_Widget, Text_Widget, hex_color,
 } = tiny;
 const {Cube, Axis_Arrows, Textured_Phong, Triangle, Phong_Shader} = defs
 
@@ -199,18 +199,33 @@ export class HouseScene extends Scene {                           // **Obj_File_
         // Load the model file:
         this.num_particles = 1024;
         this.shapes = {
-            "house": new Shape_From_File("assets/House.obj"),
-            "ground": new Shape_From_File("assets/Ground.obj"),
+            house: new Cube(),
+            door: new Cube(),
+            window: new Cube(),
+            //"house": new Shape_From_File("assets/House.obj"),
+            //"ground": new Shape_From_File("assets/Ground.obj"),
+            ground: new defs.Square(),
             "bush": new Shape_From_File("assets/Bush.obj"),
             "leaves": new Shape_From_File("assets/Leaves.obj"),
             "trunk": new Shape_From_File("assets/Trunk.obj"),
             "stepstones": new Shape_From_File("assets/StepStones.obj"),
             particles: new particles(this.num_particles)
         };
-
         this.materials = {
-            house: new Material(new defs.Phong_Shader(),
-                {ambient: .3, diffusity: .5, color: color(1, 1, 1, 1)}),
+            house: new Material(new defs.Textured_Phong(),
+                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
+                    texture: new Texture("assets/BrickColor.png")}),
+            door: new Material(new defs.Phong_Shader(),
+                {ambient: .8, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000"),}),
+            ground: new Material(new defs.Textured_Phong(),
+                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
+                    texture: new Texture("assets/Ground.png")}),
+            leaves: new Material(new defs.Textured_Phong(),
+                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
+                    texture: new Texture("assets/Leaves.png")}),
+            trunk: new Material(new defs.Textured_Phong(),
+                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
+                    texture: new Texture("assets/Trunk.png")}),
             particles: new Material(new Particle_Phong(), {
                 color: color(1,1,1,1),
                 ambient: .5, diffusity: 0.1, specularity: 0.1,
@@ -229,7 +244,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         //this.key_triggered_button("", ["o"], () => {
         //});
         this.key_triggered_button("Pause", ["c"], () => {
-            this.Pause^=true;
+                this.Pause^=true;
             }
             ,"#87cefa" );
         this.new_line();
@@ -258,7 +273,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
 
         super.display(context, program_state);
         let model_transform = Mat4.identity();
-        model_transform = model_transform.times(Mat4.scale(1.5, 1.5, 1.5));
+        model_transform = model_transform.times(Mat4.scale(1.4, 1.5, 1.4));
 
         const t = program_state.animation_time;
         let time = t/1000;
@@ -277,33 +292,41 @@ export class HouseScene extends Scene {                           // **Obj_File_
         //program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         // house
-        this.shapes.house.draw(context, program_state, model_transform, this.materials.house);
+        let house_transform = model_transform.times(Mat4.scale(1, .5999, 1));
+        this.shapes.house.draw(context, program_state, house_transform, this.materials.house);
+        let door_transform = model_transform.times(Mat4.translation(1,-.2999,.4))
+            .times(Mat4.scale(.04, .3, .15));
+        this.shapes.door.draw(context, program_state, door_transform, this.materials.door);
+        let window_transform = model_transform.times(Mat4.translation(1,.15,-.4))
+            .times(Mat4.scale(.04, .15, .15));
+        this.shapes.window.draw(context, program_state, window_transform, this.materials.door);
 
         // ground
         let ground_transform = model_transform.times(Mat4.translation(0,-.6,0))
+            .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
             .times(Mat4.scale(5, 5, 5));
-        this.shapes.ground.draw(context, program_state, ground_transform, this.materials.house);
+        this.shapes.ground.draw(context, program_state, ground_transform, this.materials.ground);
 
         // bush
         let bush_transform = model_transform.times(Mat4.translation(1,-.6,-.7))
             .times(Mat4.scale(.25, .25, .25));
-        this.shapes.bush.draw(context, program_state, bush_transform, this.materials.house);
+        this.shapes.bush.draw(context, program_state, bush_transform, this.materials.leaves);
 
         // leaves
         let leaves_transform = model_transform.times(Mat4.translation(1.5,.7,1))
             .times(Mat4.rotation(2 * Math.PI / 2, 1, 0, 0))
             .times(Mat4.scale(.25, .25, .25));
-        this.shapes.leaves.draw(context, program_state, leaves_transform, this.materials.house);
+        this.shapes.leaves.draw(context, program_state, leaves_transform, this.materials.leaves);
 
         // trunk
         let trunk_transform = model_transform.times(Mat4.translation(1.5,0,1))
-            .times(Mat4.rotation(2 * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.7, .7, .7));
-        this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.house);
+            .times(Mat4.rotation(2 * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.7, .6, .7));
+        this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
 
         // stepstones
         let stepstones_transform = model_transform.times(Mat4.translation(1.5,-.58,0))
-            .times(Mat4.scale(.3, .3, .3));
-        this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.house);
+            .times(Mat4.scale(.3, .27, .3));
+        this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.ground);
 
         //stars
         let particle_model_transform = Mat4.identity()
