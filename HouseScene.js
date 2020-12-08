@@ -198,6 +198,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         super();
         // Load the model file:
         this.num_particles = 1024;
+        this.value = 0.0;
         this.shapes = {
             house: new Cube(),
             door: new Cube(),
@@ -212,9 +213,17 @@ export class HouseScene extends Scene {                           // **Obj_File_
             particles: new particles(this.num_particles)
         };
         this.materials = {
-            house: new Material(new defs.Textured_Phong(),
+            /*house: new Material(new defs.Textured_Phong(),
                 {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
-                    texture: new Texture("assets/BrickColor.png")}),
+                    texture: new Texture("assets/BrickColor.png")}),*/
+            house: new Material(new Texture_Lerp(), {
+                val: this.val,
+                color: hex_color("#ffffff"),
+                ambient: .5, diffusivity: 0.1, specularity: 0.1,
+                texture: new Texture("assets/BrickColor.png"),
+                texture2: new Texture("assets/GrassColor.png"),
+                texture3: new Texture("assets/BrickDisplacement.png")
+            }),
             door: new Material(new defs.Phong_Shader(),
                 {ambient: .8, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000"),}),
             ground: new Material(new defs.Textured_Phong(),
@@ -248,12 +257,12 @@ export class HouseScene extends Scene {                           // **Obj_File_
             }
             ,"#87cefa" );
         this.new_line();
-        this.key_triggered_button("-", ["a"], () => {}
+        this.key_triggered_button("-", ["a"], () => {this.value -= .05;}
             ,"#0000ff" );
         this.live_string(box => {
-            box.textContent = "|    Time:    |"
+            box.textContent = "|    Time:    |" + this.value.toFixed(2)
         }, );
-        this.key_triggered_button("+", ["b"], () => {}
+        this.key_triggered_button("+", ["b"], () => {this.value += .05;}
             ,"#0000ff" );
     }
 
@@ -337,6 +346,53 @@ export class HouseScene extends Scene {                           // **Obj_File_
         this.shapes.particles.arrays.offset = this.shapes.particles.arrays.offset.map((x, i)=> x.plus(offsets[~~(i/4)]));
         this.shapes.particles.draw(context, program_state, particle_model_transform, this.materials.particles);
         this.shapes.particles.copy_onto_graphics_card(context.context, ["offset"], false);
+    }
+}
 
+class Texture_Lerp extends Textured_Phong {
+
+    update_GPU(context, gpu_addresses, gpu_state, model_transform, material) {
+        super.update_GPU(context, gpu_addresses, gpu_state, model_transform, material);
+
+        context.uniform1i(gpu_addresses.texture2, 0);
+        context.uniform1i(gpu_addresses.texture, 1);
+        context.uniform1i(gpu_addresses.texture3, 2);
+        material.texture2.activate(context, 0);
+        material.texture.activate(context, 1);
+        material.texture3.activate(context, 2);
+    }
+
+
+    fragment_glsl_code() {
+        return this.shared_glsl_code() + `
+            varying vec2 f_tex_coord;
+            uniform sampler2D texture;
+            uniform sampler2D texture2;
+            uniform sampler2D texture3;
+
+            void main(){
+                vec4 tex_color = texture2D( texture, f_tex_coord);
+                vec4 tex2_color = texture2D( texture2, f_tex_coord );
+                vec4 dispMap = texture2D(texture3, f_tex_coord);
+                
+                // TODO IMPLEMENT VAL BUTTON SIN WAVE
+                float val = 0.3;
+                // -------------------------
+                
+                val = clamp( val, 0.0, 1.0 );
+                val = 1.0 - val; // inverting
+                val *= 2.0;
+                
+                dispMap = dispMap - 1.0;
+                dispMap = dispMap + val;
+
+                dispMap = clamp(dispMap,0.0,1.0);
+                
+                gl_FragColor = mix(tex2_color, tex_color, dispMap );
+                //gl_FragColor = dispMap;
+               
+                //gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                //gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
+        } `;
     }
 }

@@ -199,7 +199,7 @@ export class House extends Scene {                           // **Obj_File_Demo*
     }
 }
 //Define Main_Scene Class
-const Main_Scene = MyScene;
+const Main_Scene = HouseScene;
 const Additional_Scenes = [];
 
 export {Main_Scene, Additional_Scenes, Canvas_Widget, Code_Widget, Text_Widget, defs}
