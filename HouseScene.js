@@ -199,6 +199,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         // Load the model file:
         this.num_particles = 1024;
         this.value = 0.0;
+        this.intensity = 0.5;
         this.shapes = {
             house: new Cube(),
             door: new Cube(),
@@ -216,21 +217,33 @@ export class HouseScene extends Scene {                           // **Obj_File_
             /*house: new Material(new defs.Textured_Phong(),
                 {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
                     texture: new Texture("assets/BrickColor.png")}),*/
-            house: new Material(new Texture_Lerp(), {
-                val: this.val,
+            bumpBrick: new Material(new defs.Bump(),
+                {ambient: .7, diffusivity: .7, normal_scale: 0.5,
+                    texture: new Texture("assets/BrickColor.png"),
+                    texture2: new Texture("assets/BrickNormal.png")}),
+
+            house: new Material(new BumpAndTextureLerp(), {
+                growth_rate: this.value,
+                normal_intensity: this.intensity,
                 color: hex_color("#ffffff"),
-                ambient: .5, diffusivity: 0.1, specularity: 0.1,
+                ambient: .7, diffusivity: 0.5, specularity: 0.8,
                 texture: new Texture("assets/BrickColor.png"),
                 texture2: new Texture("assets/GrassColor.png"),
-                texture3: new Texture("assets/BrickDisplacement.png")
+                texture3: new Texture("assets/BrickDisplacement.png"),
+                texture4: new Texture("assets/BrickNormal.png"),
+                texture5: new Texture("assets/GrassNormal.png")
             }),
             door: new Material(new defs.Phong_Shader(),
                 {ambient: .8, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000"),}),
-            ground: new Material(new defs.Textured_Phong(),
+            ground: new Material(new defs.Bump(),
+                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
+                    texture: new Texture("assets/GrassColor.png"),
+                    texture2: new Texture("assets/GrassNormal.png")}),
+            stepstones: new Material(new defs.Textured_Phong(),
                 {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
                     texture: new Texture("assets/Ground.png")}),
             leaves: new Material(new defs.Textured_Phong(),
-                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
+                {ambient: 1.0, diffusity: .5, color: color(0, 0, 0, 1),
                     texture: new Texture("assets/Leaves.png")}),
             trunk: new Material(new defs.Textured_Phong(),
                 {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
@@ -241,6 +254,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
                 texture: new Texture("assets/stars.png")
             })
         };
+        this.shapes.ground.arrays.texture_coord.forEach(v => v.scale_by(4));
 
         // Don't create any DOM elements to control this scene:
         //this.widget_options = {make_controls: false};
@@ -257,19 +271,31 @@ export class HouseScene extends Scene {                           // **Obj_File_
             }
             ,"#87cefa" );
         this.new_line();
-        this.key_triggered_button("-", ["a"], () => {this.value -= .05;}
+        this.key_triggered_button("-", ["1"], () => {
+                if(this.intensity >= 0.05) this.intensity -= .05;}
             ,"#0000ff" );
         this.live_string(box => {
-            box.textContent = "|    Time:    |" + this.value.toFixed(2)
+            box.textContent = "|   Normal Intensity:    " + this.intensity.toFixed(2) + "   |"
         }, );
-        this.key_triggered_button("+", ["b"], () => {this.value += .05;}
+        this.key_triggered_button("+", ["2"], () => {
+                if(this.intensity <= 0.95) this.intensity += .05;}
+            ,"#0000ff" );
+        this.new_line();
+        this.key_triggered_button("-", ["a"], () => {
+            if(this.value >= 0.05) this.value -= .05;}
+            ,"#0000ff" );
+        this.live_string(box => {
+            box.textContent = "|   Time:    " + this.value.toFixed(2) + "   |"
+        }, );
+        this.key_triggered_button("+", ["b"], () => {
+            if(this.value <= 0.95) this.value += .05;}
             ,"#0000ff" );
     }
 
     display(context, program_state) {
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
         let camera_matrix = Mat4.identity().times(Mat4.translation(1, 0, -6))
-            .times(Mat4.rotation(-45.25 * Math.PI / 2, 0, 1, 0))
+            .times(Mat4.rotation(-45.35 * Math.PI / 2, 0, 1, 0))
             .times(Mat4.translation(-.8, 0, 0));
 
         if (!context.scratchpad.controls) {
@@ -285,7 +311,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         model_transform = model_transform.times(Mat4.scale(1.4, 1.5, 1.4));
 
         const t = program_state.animation_time;
-        let time = t/1000;
+        let time = t*this.value/1000;
 
         if(this.Pause){
             time = 0;
@@ -294,15 +320,16 @@ export class HouseScene extends Scene {                           // **Obj_File_
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
         // A spinning light to show off the bump map:
         //program_state.lights = [new Light(vec4(3, 2, 10, 1), color(1, 1, 1, 1), 100000)];
-        program_state.lights = [new Light(
+        /*program_state.lights = [new Light(
             Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(3, 2, 10, 1)),
-            color(1, 1, 1, 1), 100000)];
-        //const light_position = vec4(10, 10, 10, 1); //moved point position to origin (0,0,0)
-        //program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+            color(1, 1, 1, 1), 100000)];*/
+        const light_position = vec4(15, 10, 15, 1); //moved point position to origin (0,0,0)
+        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         // house
         let house_transform = model_transform.times(Mat4.scale(1, .5999, 1));
-        this.shapes.house.draw(context, program_state, house_transform, this.materials.house);
+        this.shapes.house.draw(context, program_state, house_transform,
+            this.materials.house.override({growth_rate: this.value, normal_intensity: this.intensity}));
         let door_transform = model_transform.times(Mat4.translation(1,-.2999,.4))
             .times(Mat4.scale(.04, .3, .15));
         this.shapes.door.draw(context, program_state, door_transform, this.materials.door);
@@ -335,7 +362,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         // stepstones
         let stepstones_transform = model_transform.times(Mat4.translation(1.5,-.58,0))
             .times(Mat4.scale(.3, .27, .3));
-        this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.ground);
+        this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.stepstones);
 
         //stars
         let particle_model_transform = Mat4.identity()
@@ -369,6 +396,7 @@ class Texture_Lerp extends Textured_Phong {
             uniform sampler2D texture;
             uniform sampler2D texture2;
             uniform sampler2D texture3;
+            uniform float val;
 
             void main(){
                 vec4 tex_color = texture2D( texture, f_tex_coord);
@@ -376,7 +404,7 @@ class Texture_Lerp extends Textured_Phong {
                 vec4 dispMap = texture2D(texture3, f_tex_coord);
                 
                 // TODO IMPLEMENT VAL BUTTON SIN WAVE
-                float val = 0.3;
+                val = 0.4;
                 // -------------------------
                 
                 val = clamp( val, 0.0, 1.0 );
@@ -394,5 +422,184 @@ class Texture_Lerp extends Textured_Phong {
                 //gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                 //gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
         } `;
+    }
+}
+
+class BumpAndTextureLerp extends Phong_Shader {
+
+    constructor(num_lights = 2) {
+        super();
+        this.num_lights = num_lights;
+    }
+
+    shared_glsl_code() {
+        // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
+        return ` precision mediump float;
+                const int N_LIGHTS = ` + this.num_lights + `;
+                uniform float ambient, diffusivity, specularity, smoothness;
+                uniform vec4 light_positions_or_vectors[N_LIGHTS], light_colors[N_LIGHTS];
+                uniform float light_attenuation_factors[N_LIGHTS];
+                uniform vec4 shape_color;
+                uniform vec3 squared_scale, camera_center;
+        
+                // Specifier "varying" means a variable's final value will be passed from the vertex shader
+                // on to the next phase (fragment shader), then interpolated per-fragment, weighted by the
+                // pixel fragment's proximity to each of the 3 vertices (barycentric interpolation).
+                varying vec3 N, vertex_worldspace;
+                vec3 L, H;
+                // ***** PHONG SHADING HAPPENS HERE: *****                                       
+                vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace ){                                        
+                    // phong_model_lights():  Add up the lights' contributions.
+                    vec3 E = normalize( camera_center - vertex_worldspace );
+                    vec3 result = vec3( 0.0 );
+                    for(int i = 0; i < N_LIGHTS; i++){
+                        // Lights store homogeneous coords - either a position or vector.  If w is 0, the 
+                        // light will appear directional (uniform direction from all points), and we 
+                        // simply obtain a vector towards the light by directly using the stored value.
+                        // Otherwise if w is 1 it will appear as a point light -- compute the vector to 
+                        // the point light's location from the current surface point.  In either case, 
+                        // fade (attenuate) the light as the vector needed to reach it gets longer.  
+                        vec3 surface_to_light_vector = light_positions_or_vectors[i].xyz - 
+                                                       light_positions_or_vectors[i].w * vertex_worldspace;                                             
+                        float distance_to_light = length( surface_to_light_vector );
+        
+                        L = normalize( surface_to_light_vector );
+                        H = normalize( L + E );
+                        // Compute the diffuse and specular components from the Phong
+                        // Reflection Model, using Blinn's "halfway vector" method:
+                        float diffuse  =      max( dot( N, L ), 0.0 );
+                        float specular = pow( max( dot( N, H ), 0.0 ), smoothness );
+                        float attenuation = 1.0 / (1.0 + light_attenuation_factors[i] * distance_to_light * distance_to_light );
+                        
+                        vec3 light_contribution = shape_color.xyz * light_colors[i].xyz * diffusivity * diffuse
+                                                                  + light_colors[i].xyz * specularity * specular;
+                        result += attenuation * light_contribution;
+                      }
+                    return result;
+                  } `;
+    }
+
+    vertex_glsl_code() {
+        // ********* VERTEX SHADER *********
+        return this.shared_glsl_code() + `
+                varying vec2 f_tex_coord;
+                attribute vec3 position, normal;                            
+                // Position is expressed in object coordinates.
+                attribute vec2 texture_coord;
+                
+                uniform mat4 model_transform;
+                uniform mat4 projection_camera_model_transform;
+                uniform sampler2D texture;
+               
+                void main(){                                                                   
+                    // The vertex's final resting place (in NDCS):
+                    gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
+                    // The final normal vector in screen space.
+                    N = normalize( mat3( model_transform ) * normal / squared_scale);
+                    vertex_worldspace = ( model_transform * vec4( position, 1.0 ) ).xyz;
+                    // Turn the per-vertex texture coordinate into an interpolated variable.
+                    f_tex_coord = texture_coord;
+           
+                    vec3 eyePosition = (model_transform *  gl_Position).xyz;
+                    vec3 eyeLightPos = (model_transform * light_positions_or_vectors[0]).xyz;
+                    vec3 T = normalize(vec3(1,0,0));
+                    vec3 B = cross(N, T);
+                    L.x = dot(T, eyeLightPos - eyePosition);
+                    L.y = dot(B, eyeLightPos - eyePosition);
+                    L.z = dot(N, eyeLightPos - eyePosition);
+                    L = normalize(L);
+                    
+                  } `;
+    }
+
+    fragment_glsl_code() {
+        // ********* FRAGMENT SHADER *********
+        // A fragment is a pixel that's overlapped by the current triangle.
+        // Fragments affect the final image or get discarded due to depth.
+        return this.shared_glsl_code() + `
+                varying vec2 f_tex_coord;
+                uniform sampler2D texture;
+                uniform sampler2D texture2;
+                uniform sampler2D texture3;
+                uniform sampler2D texture4;
+                uniform sampler2D texture5;
+                uniform float growth_rate;
+                uniform float normal_intensity;
+        
+                void main(){
+                    // Sample the texture image in the correct place:
+                    vec4 tex_color = texture2D(texture, f_tex_coord);
+                    vec4 tex2_color = texture2D(texture2, f_tex_coord);
+                    vec4 dispMap = texture2D(texture3, f_tex_coord);
+                    vec4 tex4_color = texture2D(texture4, f_tex_coord);
+                    vec4 tex5_color = texture2D(texture5, f_tex_coord);
+                    
+                    // TODO IMPLEMENT VAL BUTTON SIN WAVE
+                    float val = growth_rate;
+                    // -------------------------
+                    
+                    val = clamp( val, 0.0, 1.0 );
+                    val = 1.0 - val; // inverting
+                    val *= 2.0; 
+                
+                    dispMap = dispMap - 1.0;
+                    dispMap = dispMap + val;
+
+                    dispMap = clamp(dispMap,0.0,1.0);
+                
+                    gl_FragColor = mix(tex2_color, tex_color, dispMap);
+                
+                    //if( tex_color.w < .01 ) discard;
+                    float normal_scale = normal_intensity;
+                    normal_scale = 1.0 - normal_scale; //inverting
+                    vec3 bumpN = normal_scale*normalize(N) - .5*vec3(1,1,1);
+                    if(growth_rate >= 0.9)
+                        bumpN += tex5_color.rgb;
+                    else
+                        bumpN += tex4_color.rgb;
+                    
+                                                                      // Compute an initial (ambient) color:
+                    //gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                                                                             // Compute the final color with contributions from lights:
+                    gl_FragColor.xyz += phong_model_lights( normalize( bumpN ), vertex_worldspace );
+                  } `;
+    }
+
+    send_material(gl, gpu, material) {
+        // send_material(): Send the desired shape-wide material qualities to the
+        // graphics card, where they will tweak the Phong lighting formula.
+        gl.uniform4fv(gpu.shape_color, material.color);
+        gl.uniform1f(gpu.ambient, material.ambient);
+        gl.uniform1f(gpu.diffusivity, material.diffusivity);
+        gl.uniform1f(gpu.specularity, material.specularity);
+        gl.uniform1f(gpu.smoothness, material.smoothness);
+        gl.uniform1f(gpu.growth_rate, material.growth_rate);
+        gl.uniform1f(gpu.normal_intensity, material.normal_intensity);
+    }
+
+    update_GPU(context, gpu_addresses, gpu_state, model_transform, material) {
+        // update_GPU(): Add a little more to the base class's version of this method.
+        super.update_GPU(context, gpu_addresses, gpu_state, model_transform, material);
+
+        //if (material.texture && material.texture.ready) {
+        // Select texture unit 0 for the fragment shader Sampler2D uniform called "texture":
+
+        context.uniform1i(gpu_addresses.texture2, 0);
+        context.uniform1i(gpu_addresses.texture, 1);
+        context.uniform1i(gpu_addresses.texture3, 2);
+        context.uniform1i(gpu_addresses.texture4, 3);
+        context.uniform1i(gpu_addresses.texture5, 4);
+        // For this draw, use the texture image from correct the GPU buffer:
+        material.texture2.activate(context, 0);
+        material.texture.activate(context, 1);
+        material.texture3.activate(context, 2);
+        material.texture4.activate(context, 3);
+        material.texture5.activate(context, 4);
+
+        context.uniform1i(gpu_addresses.growth_rate, 5);
+        context.uniform1i(gpu_addresses.normal_intensity, 6);
+
+        //}
+        //}
     }
 }
