@@ -263,11 +263,12 @@ export class HouseScene extends Scene {                           // **Obj_File_
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        //this.key_triggered_button("", ["c"], );
-        //this.key_triggered_button("", ["o"], () => {
-        //});
-        this.key_triggered_button("Pause", ["c"], () => {
+        /*this.key_triggered_button("Pause", ["c"], () => {
                 this.Pause^=true;
+            }
+            ,"#87cefa" );*/
+        this.key_triggered_button("Animate", ["t"], () => {
+                this.Animate^=true;
             }
             ,"#87cefa" );
         this.new_line();
@@ -278,11 +279,11 @@ export class HouseScene extends Scene {                           // **Obj_File_
             box.textContent = "|   Normal Intensity:    " + this.intensity.toFixed(2) + "   |"
         }, );
         this.key_triggered_button("+", ["2"], () => {
-                if(this.intensity <= 0.95) this.intensity += .05;}
+                if(!this.Animate && this.intensity <= 0.95) this.intensity += .05;}
             ,"#0000ff" );
         this.new_line();
         this.key_triggered_button("-", ["a"], () => {
-            if(this.value >= 0.05) this.value -= .05;}
+            if(!this.Animate && this.value >= 0.05) this.value -= .05;}
             ,"#0000ff" );
         this.live_string(box => {
             box.textContent = "|   Time:    " + this.value.toFixed(2) + "   |"
@@ -311,11 +312,11 @@ export class HouseScene extends Scene {                           // **Obj_File_
         model_transform = model_transform.times(Mat4.scale(1.4, 1.5, 1.4));
 
         const t = program_state.animation_time;
-        let time = t*this.value/1000;
+        /*let time = t*this.value/1000;
 
         if(this.Pause){
             time = 0;
-        }
+        }*/
 
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
         // A spinning light to show off the bump map:
@@ -326,6 +327,10 @@ export class HouseScene extends Scene {                           // **Obj_File_
         const light_position = vec4(15, 10, 15, 1); //moved point position to origin (0,0,0)
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
+        // animate
+        if (this.Animate) {
+            this.value = (1 + Math.sin(2 * Math.PI * t / 10000)) / 2;
+        }
         // house
         let house_transform = model_transform.times(Mat4.scale(1, .5999, 1));
         this.shapes.house.draw(context, program_state, house_transform,
@@ -367,7 +372,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         //stars
         let particle_model_transform = Mat4.identity()
             .times(Mat4.rotation(-45 * Math.PI / 2, 0, 1, 0))
-            .times(Mat4.rotation(time, 0, 0, 1));
+            .times(Mat4.rotation(this.value * 2, 0, 0, 1));
 
         const offsets = Array(this.num_particles).fill(0).map(x=>vec3(0,0,0).randomized(.01));
         this.shapes.particles.arrays.offset = this.shapes.particles.arrays.offset.map((x, i)=> x.plus(offsets[~~(i/4)]));
