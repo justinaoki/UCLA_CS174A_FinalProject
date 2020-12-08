@@ -7,6 +7,7 @@ import {Scene_To_Texture_Demo} from "./examples/scene-to-texture-demo.js"
 import {Surfaces_Demo} from "./examples/surfaces-demo.js"
 import {Text_Demo} from "./examples/text-demo.js"
 import {Transforms_Sandbox} from "./examples/transforms-sandbox.js"
+import {MyScene} from "./examples/Height_Lerp.js"
 import {Plane} from "./examples/plane.js"
 import {HouseScene} from "./HouseScene.js"
 // Pull these names into this module's scope for convenience:
@@ -198,7 +199,7 @@ export class House extends Scene {                           // **Obj_File_Demo*
     }
 }
 //Define Main_Scene Class
-const Main_Scene = Plane;
+const Main_Scene = MyScene;
 const Additional_Scenes = [];
 
 export {Main_Scene, Additional_Scenes, Canvas_Widget, Code_Widget, Text_Widget, defs}
