@@ -225,8 +225,8 @@ export class HouseScene extends Scene {                           // **Obj_File_
             house: new Material(new BumpAndTextureLerp(), {
                 growth_rate: this.value,
                 normal_intensity: this.intensity,
-                color: hex_color("#ffffff"),
-                ambient: .7, diffusivity: 0.5, specularity: 0.8,
+                //color: hex_color("#ffffff"),
+                ambient: .7, diffusivity: 0.5, //specularity: 0.8,
                 texture: new Texture("assets/BrickColor.png"),
                 texture2: new Texture("assets/GrassColor.png"),
                 texture3: new Texture("assets/BrickDisplacement.png"),
@@ -234,7 +234,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
                 texture5: new Texture("assets/GrassNormal.png")
             }),
             door: new Material(new defs.Phong_Shader(),
-                {ambient: .8, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000"),}),
+                {ambient: .8, diffusivity: 0.1, specularity: 0.1, color: hex_color("#0D0F24"),}),
             ground: new Material(new defs.Bump(),
                 {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
                     texture: new Texture("assets/GrassColor.png"),
@@ -324,7 +324,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         /*program_state.lights = [new Light(
             Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(3, 2, 10, 1)),
             color(1, 1, 1, 1), 100000)];*/
-        const light_position = vec4(15, 10, 15, 1); //moved point position to origin (0,0,0)
+        const light_position = vec4(4, 4, 8, 1); //moved point position to origin (0,0,0)
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         // animate
@@ -424,7 +424,7 @@ class Texture_Lerp extends Textured_Phong {
                 gl_FragColor = mix(tex2_color, tex_color, dispMap );
                 //gl_FragColor = dispMap;
                
-                //gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                 //gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
         } `;
     }
