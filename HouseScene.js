@@ -280,7 +280,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
             box.textContent = "|   Time:    " + this.value.toFixed(2) + "   |"
         }, );
         this.key_triggered_button("+", ["b"], () => {
-            if(this.value <= 0.95) this.value += .05;}
+            if(this.value <= 1.0) this.value += .05;}
             ,"#0000ff" );
         this.new_line();
         this.key_triggered_button("-", ["c"], () => {
@@ -300,7 +300,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
             box.textContent = "|   Normal Intensity:    " + this.intensity.toFixed(2) + "   |"
         }, );
         this.key_triggered_button("+", ["2"], () => {
-                if(!this.Animate && this.intensity <= 0.95) this.intensity += .05;}
+                if(!this.Animate && this.intensity <= 1.0) this.intensity += .05;}
             ,"#5c9471" );
     }
 
@@ -336,8 +336,8 @@ export class HouseScene extends Scene {                           // **Obj_File_
         /*program_state.lights = [new Light(
             Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(3, 2, 10, 1)),
             color(1, 1, 1, 1), 100000)];*/
-        const light_position = vec4(4, 4, 8, 1); //moved point position to origin (0,0,0)
-        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+        const light_position = vec4(-1, 0, 10, 1); //moved point position to origin (0,0,0)
+        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 100)];
 
         // animate
         if (this.Animate) {
@@ -377,7 +377,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
 
         // stepstones
-        let stepstones_transform = model_transform.times(Mat4.translation(1.5,-.58,0))
+        let stepstones_transform = model_transform.times(Mat4.translation(2.0,-.58,0))
             .times(Mat4.scale(.3, .27, .3));
         this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.stepstones);
 
@@ -507,6 +507,8 @@ class BumpAndTextureLerp extends Phong_Shader {
                 uniform mat4 model_transform;
                 uniform mat4 projection_camera_model_transform;
                 uniform sampler2D texture;
+                uniform sampler2D texture2;
+             
                
                 void main(){                                                                   
                     // The vertex's final resting place (in NDCS):
@@ -568,7 +570,8 @@ class BumpAndTextureLerp extends Phong_Shader {
                 
                     //if( tex_color.w < .01 ) discard;
                     float normal_scale = normal_intensity;
-                    normal_scale = 1.0 - normal_scale; //inverting
+                    //normal_scale = 1.0 - normal_scale; 
+                    normal_scale /= 2.0;
                     vec3 bumpN = normal_scale*normalize(N) - .5*vec3(1,1,1);
                     if(growth_rate >= 0.9)
                         bumpN += tex5_color.rgb;
