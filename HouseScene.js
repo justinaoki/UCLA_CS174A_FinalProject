@@ -273,34 +273,34 @@ export class HouseScene extends Scene {                           // **Obj_File_
             }
             ,"#87cefa" );
         this.new_line();
-        this.key_triggered_button("-", ["a"], () => {
+        this.key_triggered_button("-", ["5"], () => {
             if(!this.Animate && this.value >= 0.05) this.value -= .05;}
             ,"#0000ff" );
         this.live_string(box => {
             box.textContent = "|   Time:    " + this.value.toFixed(2) + "   |"
         }, );
-        this.key_triggered_button("+", ["b"], () => {
-            if(this.value <= 1.0) this.value += .05;}
+        this.key_triggered_button("+", ["6"], () => {
+            if(!this.Animate && this.value <= 1.0) this.value += .05;}
             ,"#0000ff" );
         this.new_line();
-        this.key_triggered_button("-", ["c"], () => {
-                if(this.speed_factor <= 100000) this.speed_factor += 500;}
+        this.key_triggered_button("-", ["7"], () => {
+                if(!this.Animate && this.speed_factor <= 100000) this.speed_factor += 500;}
             ,"#859ccc" );
         this.live_string(box => {
             box.textContent = "|   Speed:    " + ((1/this.speed_factor)*1000).toFixed(3) + "   |"
         }, );
-        this.key_triggered_button("+", ["d"], () => {
-                if(this.speed_factor >= 1500) this.speed_factor -= 500;}
+        this.key_triggered_button("+", ["8"], () => {
+                if(!this.Animate && this.speed_factor >= 1500) this.speed_factor -= 500;}
             ,"#859ccc" );
         this.new_line();
-        this.key_triggered_button("-", ["1"], () => {
+        this.key_triggered_button("-", ["9"], () => {
                 if(this.intensity >= 0.05) this.intensity -= .05;}
             ,"#5c9471" );
         this.live_string(box => {
             box.textContent = "|   Normal Intensity:    " + this.intensity.toFixed(2) + "   |"
         }, );
-        this.key_triggered_button("+", ["2"], () => {
-                if(!this.Animate && this.intensity <= 1.0) this.intensity += .05;}
+        this.key_triggered_button("+", ["0"], () => {
+                if(this.intensity <= 1.0) this.intensity += .05;}
             ,"#5c9471" );
     }
 
@@ -323,7 +323,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         model_transform = model_transform.times(Mat4.scale(1.4, 1.5, 1.4));
 
         const t = program_state.animation_time;
-        let speed = 1/this.speed_factor;
+        let speed = 1 / this.speed_factor;
         /*let time = t*this.value/1000;
 
         if(this.Pause){
