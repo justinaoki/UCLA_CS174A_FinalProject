@@ -213,7 +213,10 @@ export class HouseScene extends Scene {                           // **Obj_File_
             "leaves": new Shape_From_File("assets/Leaves.obj"),
             "trunk": new Shape_From_File("assets/Trunk.obj"),
             "stepstones": new Shape_From_File("assets/StepStones.obj"),
-            particles: new particles(this.num_particles)
+            particles: new particles(this.num_particles),
+            stone1: new defs.Capped_Cylinder(25,25),
+            stone2: new defs.Capped_Cylinder(10,10)
+
         };
         this.materials = {
             /*house: new Material(new defs.Textured_Phong(),
@@ -388,7 +391,21 @@ export class HouseScene extends Scene {                           // **Obj_File_
         // stepstones
         let stepstones_transform = model_transform.times(Mat4.translation(2.0,-.58,0))
             .times(Mat4.scale(.3, .27, .3));
-        this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.stepstones);
+        //this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.stepstones);
+
+        //stones
+        let stone1_transform = model_transform.times(Mat4.translation(1.5, -0.59, 0.2))
+            .times(Mat4.rotation(Math.PI/2, 1, 0, 0))
+            .times(Mat4.scale(.15, .15, .02));
+        this.shapes.stone1.draw(context, program_state, stone1_transform, this.materials.stepstones);
+        let stone2_transform = model_transform.times(Mat4.translation(2.0, -0.59, -0.1))
+            .times(Mat4.rotation(Math.PI/2, 1, 0, 0))
+            .times(Mat4.scale(.1, .1, .02));
+        this.shapes.stone1.draw(context, program_state, stone2_transform, this.materials.stepstones);
+        let stone3_transform = model_transform.times(Mat4.translation(2.3, -0.59, 0.08))
+            .times(Mat4.rotation(Math.PI/2, 1, 0, 0))
+            .times(Mat4.scale(.09, .09, .02));
+        this.shapes.stone1.draw(context, program_state, stone3_transform, this.materials.stepstones);
 
         //stars
         let particle_model_transform = Mat4.identity()
