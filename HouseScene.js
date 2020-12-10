@@ -201,6 +201,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
         this.value = 0.0; //for heightmap
         this.intensity = 0.5; //for brick intensity
         this.speed_factor = 10000; //for speed
+        this.time_direction = true; //for smooth animation
         this.shapes = {
             house: new Cube(),
             door: new Cube(),
@@ -269,7 +270,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
             }
             ,"#87cefa" );*/
         this.key_triggered_button("Play/Pause", ["t"], () => {
-                this.Animate^=true;
+                this.Animate ^= true;
             }
             ,"#87cefa" );
         this.new_line();
@@ -284,13 +285,13 @@ export class HouseScene extends Scene {                           // **Obj_File_
             ,"#0000ff" );
         this.new_line();
         this.key_triggered_button("-", ["7"], () => {
-                if(!this.Animate && this.speed_factor <= 100000) this.speed_factor += 500;}
+                if(this.speed_factor <= 100000) this.speed_factor += 500;}
             ,"#859ccc" );
         this.live_string(box => {
             box.textContent = "|   Speed:    " + ((1/this.speed_factor)*1000).toFixed(3) + "   |"
         }, );
         this.key_triggered_button("+", ["8"], () => {
-                if(!this.Animate && this.speed_factor >= 1500) this.speed_factor -= 500;}
+                if(this.speed_factor >= 1500) this.speed_factor -= 500;}
             ,"#859ccc" );
         this.new_line();
         this.key_triggered_button("-", ["9"], () => {
@@ -341,7 +342,15 @@ export class HouseScene extends Scene {                           // **Obj_File_
 
         // animate
         if (this.Animate) {
-            this.value = (1 + Math.sin(2 * Math.PI * t * speed)) / 2;
+            //this.value = (1 + Math.sin(2 * Math.PI * (t - this.start_time) * speed)) / 2;
+            if (this.value >= 1)
+                this.time_direction = false;
+            else if (this.value <= 0)
+                this.time_direction = true;
+            if (this.time_direction)
+                this.value += 50 / this.speed_factor;
+            else
+                this.value -= 50 / this.speed_factor;
         }
         // house
         let house_transform = model_transform.times(Mat4.scale(1, .5999, 1));
