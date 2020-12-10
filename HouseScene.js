@@ -301,7 +301,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
                 if(this.intensity >= 0.05) this.intensity -= .05;}
             ,"#5c9471" );
         this.live_string(box => {
-            box.textContent = "|   Normal Intensity:    " + this.intensity.toFixed(2) + "   |"
+            box.textContent = "|   Brick Lighting:    " + this.intensity.toFixed(2) + "   |"
         }, );
         this.key_triggered_button("+", ["0"], () => {
                 if(this.intensity <= 1.0) this.intensity += .05;}
@@ -313,6 +313,15 @@ export class HouseScene extends Scene {                           // **Obj_File_
         let camera_matrix = Mat4.identity().times(Mat4.translation(1, 0, -6))
             .times(Mat4.rotation(-45.35 * Math.PI / 2, 0, 1, 0))
             .times(Mat4.translation(-.8, 0, 0));
+
+        program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
+        // A spinning light to show off the bump map:
+        //program_state.lights = [new Light(vec4(3, 2, 10, 1), color(1, 1, 1, 1), 100000)];
+        /*program_state.lights = [new Light(
+            Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(0, 0, 10, 1)),
+            color(1, 1, 1, 1), 100000)];*/
+        const light_position = vec4(0, 0, 10, 1);
+        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 100)];
 
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
@@ -334,14 +343,6 @@ export class HouseScene extends Scene {                           // **Obj_File_
             time = 0;
         }*/
 
-        program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
-        // A spinning light to show off the bump map:
-        //program_state.lights = [new Light(vec4(3, 2, 10, 1), color(1, 1, 1, 1), 100000)];
-        /*program_state.lights = [new Light(
-            Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(3, 2, 10, 1)),
-            color(1, 1, 1, 1), 100000)];*/
-        const light_position = vec4(-1, 0, 10, 1); //moved point position to origin (0,0,0)
-        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 100)];
 
         // animate
         if (this.Animate) {
@@ -599,7 +600,7 @@ class BumpAndTextureLerp extends Phong_Shader {
                     //normal_scale = 1.0 - normal_scale; 
                     normal_scale /= 2.0;
                     vec3 bumpN = normal_scale*normalize(N) - .5*vec3(1,1,1);
-                    if(growth_rate >= 0.9)
+                    if(growth_rate >= 0.97)
                         bumpN += tex5_color.rgb;
                     else
                         bumpN += tex4_color.rgb;
