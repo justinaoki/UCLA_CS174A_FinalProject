@@ -12,7 +12,7 @@ Advanced Features:
 3. Particle Effects
 
 Contributions:
-    1. Justin Aoki - Normal/Bump Map, Particle Effects, Buttons
-    2. Ivana Chang - Build Scene, Animation, Buttons
-    3. Zachary McNelley - Create .obj files, Texture Lerp/Height Map
+1. Justin Aoki - Normal/Bump Map, Particle Effects, Buttons
+2. Ivana Chang - Build Scene, Animation, Buttons
+3. Zachary McNelley - Create .obj files, Texture Lerp/Height Map
     
