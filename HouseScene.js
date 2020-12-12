@@ -600,11 +600,30 @@ class BumpAndTextureLerp extends Phong_Shader {
                     //normal_scale = 1.0 - normal_scale; 
                     normal_scale /= 2.0;
                     vec3 bumpN = normal_scale*normalize(N) - .5*vec3(1,1,1);
-                    if(growth_rate >= 0.97)
-                        bumpN += tex5_color.rgb;
-                    else
-                        bumpN += tex4_color.rgb;
                     
+                    
+                    //mix bumpN
+                    if(growth_rate <= 0.7){
+                        bumpN += tex4_color.rgb;
+                    }else if(growth_rate <= 0.8){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.2);
+                    }else if(growth_rate <= 0.825){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.3);
+                    }else if(growth_rate <= 0.85){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.4);
+                    }else if(growth_rate <= 0.875){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.5);
+                    }else if(growth_rate <= 0.9){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.6);
+                    }else if(growth_rate <= 0.925){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.7);
+                    }else if(growth_rate <= 0.95){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.8);
+                    }else if(growth_rate <= 0.97){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.9);
+                    }else{
+                        bumpN += tex5_color.rgb;
+                    }
                                                                       // Compute an initial (ambient) color:
                     //gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                                                                              // Compute the final color with contributions from lights:
