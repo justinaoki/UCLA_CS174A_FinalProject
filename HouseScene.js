@@ -187,13 +187,8 @@ const Particle_Phong = defs.Particle_Phong =
     }
 
 
-export class HouseScene extends Scene {                           // **Obj_File_Demo** show how to load a single 3D model from an OBJ file.
-    // Detailed model files can be used in place of simpler primitive-based
-    // shapes to add complexity to a scene.  Simpler primitives in your scene
-    // can just be thought of as placeholders until you find a model file
-    // that fits well.  This demo shows the teapot model twice, with one
-    // teapot showing off the Fake_Bump_Map effect while the other has
-    // regular texture and Phong lighting.
+export class HouseScene extends Scene {
+
     constructor() {
         super();
         // Load the model file:
@@ -206,8 +201,6 @@ export class HouseScene extends Scene {                           // **Obj_File_
             house: new Cube(),
             door: new Cube(),
             window: new Cube(),
-            //"house": new Shape_From_File("assets/House.obj"),
-            //"ground": new Shape_From_File("assets/Ground.obj"),
             ground: new defs.Square(),
             "bush": new Shape_From_File("assets/Bush.obj"),
             "leaves": new Shape_From_File("assets/Leaves.obj"),
@@ -219,9 +212,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
 
         };
         this.materials = {
-            /*house: new Material(new defs.Textured_Phong(),
-                {ambient: .8, diffusity: .5, color: color(0, 0, 0, 1),
-                    texture: new Texture("assets/BrickColor.png")}),*/
+
             bumpBrick: new Material(new defs.Bump(),
                 {ambient: .7, diffusivity: .7, normal_scale: 0.5,
                     texture: new Texture("assets/BrickColor.png"),
@@ -268,10 +259,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        /*this.key_triggered_button("Pause", ["c"], () => {
-                this.Pause^=true;
-            }
-            ,"#87cefa" );*/
+
         this.key_triggered_button("Play/Pause", ["t"], () => {
                 this.Animate ^= true;
             }
@@ -315,11 +303,7 @@ export class HouseScene extends Scene {                           // **Obj_File_
             .times(Mat4.translation(-.8, 0, 0));
 
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
-        // A spinning light to show off the bump map:
-        //program_state.lights = [new Light(vec4(3, 2, 10, 1), color(1, 1, 1, 1), 100000)];
-        /*program_state.lights = [new Light(
-            Mat4.rotation(t / 1000, 1, 0, 0).times(vec4(0, 0, 10, 1)),
-            color(1, 1, 1, 1), 100000)];*/
+
         const light_position = vec4(0, 0, 10, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 100)];
 
@@ -337,16 +321,9 @@ export class HouseScene extends Scene {                           // **Obj_File_
 
         const t = program_state.animation_time;
         let speed = 1 / this.speed_factor;
-        /*let time = t*this.value/1000;
-
-        if(this.Pause){
-            time = 0;
-        }*/
-
 
         // animate
         if (this.Animate) {
-            //this.value = (1 + Math.sin(2 * Math.PI * (t - this.start_time) * speed)) / 2;
             if (this.value >= 1)
                 this.time_direction = false;
             else if (this.value <= 0)
@@ -388,11 +365,6 @@ export class HouseScene extends Scene {                           // **Obj_File_
         let trunk_transform = model_transform.times(Mat4.translation(1.5,0,1))
             .times(Mat4.rotation(2 * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.7, .6, .7));
         this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
-
-        // stepstones
-        let stepstones_transform = model_transform.times(Mat4.translation(2.0,-.58,0))
-            .times(Mat4.scale(.3, .27, .3));
-        //this.shapes.stepstones.draw(context, program_state, stepstones_transform, this.materials.stepstones);
 
         //stones
         let stone1_transform = model_transform.times(Mat4.translation(1.5, -0.59, 0.2))
@@ -461,7 +433,6 @@ class Texture_Lerp extends Textured_Phong {
                 dispMap = clamp(dispMap,0.0,1.0);
                 
                 gl_FragColor = mix(tex2_color, tex_color, dispMap );
-                //gl_FragColor = dispMap;
                
                 gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
                 //gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
@@ -535,8 +506,7 @@ class BumpAndTextureLerp extends Phong_Shader {
                 uniform mat4 projection_camera_model_transform;
                 uniform sampler2D texture;
                 uniform sampler2D texture2;
-             
-               
+ 
                 void main(){                                                                   
                     // The vertex's final resting place (in NDCS):
                     gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
@@ -580,9 +550,7 @@ class BumpAndTextureLerp extends Phong_Shader {
                     vec4 tex4_color = texture2D(texture4, f_tex_coord);
                     vec4 tex5_color = texture2D(texture5, f_tex_coord);
                     
-                    // TODO IMPLEMENT VAL BUTTON SIN WAVE
                     float val = growth_rate;
-                    // -------------------------
                     
                     val = clamp( val, 0.0, 1.0 );
                     val = 1.0 - val; // inverting
@@ -595,32 +563,15 @@ class BumpAndTextureLerp extends Phong_Shader {
                 
                     gl_FragColor = mix(tex2_color, tex_color, dispMap);
                 
-                    //if( tex_color.w < .01 ) discard;
-                    float normal_scale = normal_intensity;
-                    //normal_scale = 1.0 - normal_scale; 
+                    float normal_scale = normal_intensity; 
                     normal_scale /= 2.0;
                     vec3 bumpN = normal_scale*normalize(N) - .5*vec3(1,1,1);
                     
-                    
                     //mix bumpN
-                    if(growth_rate <= 0.7){
+                    if(growth_rate <= 0.75){
                         bumpN += tex4_color.rgb;
-                    }else if(growth_rate <= 0.8){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.2);
-                    }else if(growth_rate <= 0.825){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.3);
-                    }else if(growth_rate <= 0.85){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.4);
-                    }else if(growth_rate <= 0.875){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.5);
-                    }else if(growth_rate <= 0.9){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.6);
-                    }else if(growth_rate <= 0.925){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.7);
-                    }else if(growth_rate <= 0.95){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.8);
-                    }else if(growth_rate <= 0.97){
-                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, 0.9);
+                    }else if(growth_rate <= 0.975){
+                        bumpN += mix(tex4_color.rgb, tex5_color.rgb, (4.0*growth_rate) - 3.0);
                     }else{
                         bumpN += tex5_color.rgb;
                     }
@@ -647,7 +598,6 @@ class BumpAndTextureLerp extends Phong_Shader {
         // update_GPU(): Add a little more to the base class's version of this method.
         super.update_GPU(context, gpu_addresses, gpu_state, model_transform, material);
 
-        //if (material.texture && material.texture.ready) {
         // Select texture unit 0 for the fragment shader Sampler2D uniform called "texture":
 
         context.uniform1i(gpu_addresses.texture2, 0);
@@ -665,7 +615,5 @@ class BumpAndTextureLerp extends Phong_Shader {
         context.uniform1i(gpu_addresses.growth_rate, 5);
         context.uniform1i(gpu_addresses.normal_intensity, 6);
 
-        //}
-        //}
     }
 }
