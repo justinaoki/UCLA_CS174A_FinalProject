@@ -1,30 +1,18 @@
 # tiny-graphics.js
 
-This is a small, single file JavaScript utility.  It organizes WebGL programs to be object-oriented and minimally cluttered.  
+CS 174A Fall 2020 Final Project.
 
-Writing code with raw JavaScript and WebGL can be repetitive and tedious.  Using frameworks like three.js can create an undesired separation between you and the raw JavaScript and WebGL and common graphics operations you want to learn.  Unlike other frameworks, tiny-graphics.js is purpose-built for education, has small source code, and teaches you how it is made.
+Members: Justin Aoki, Ivana Chang, Zachary McNelley.
 
-This tiny library gives your WebGL program access to linear algebra routines, useful UI controls and readouts, and the drawing utilities needed by modern shader-based graphics.  It factors away the repetitive logic of GPU communication into re-usable objects.  The objects can be seamlessly shared between multiple WebGL contexts (drawing regions) on a web page.
+Idea: Our project simulates the passage of time by showing grass growing on a brick house. We used bump mapping to make the brick house look realistic and a texture lerp to allow the grass to begin growing from the deepest cracks in the brick and slowly expand outwards. The user can press play/pause to animate the scene and watch as the time moves forward and backward. The stars, made with particle effects, rotate in the night sky to contribute to the passage of time. The user can also pause the scene and view any particular moment in time with the Time buttons. The user can play with the rate at which the time passes with the Speed buttons. Lastly, the user can control the lighting of the brick house to see the effects of the bump map with the Brick Lighting buttons.
 
-The tiny-graphics.js software library has accompanied UCLA Computer Science's 174a course (Intro to Computer Graphics) since 2016, replacing Edward Angel's supplemental code from his textbook "Interactive Computer Graphics: A Top-Down Approach with WebGL".  Compared to Angel's library, tiny-graphics.js offers more organization and functionality.
+Advanced Features:
+1. Normal/Bump Mapping
+2. Texture Lerp/Height Mapping
+3. Particle Effects
 
-This code library accompanies and supports a web project by the same author called "The Encyclopedia of Code", a crowd-sourced repository of WebGL demos and educational tutorials that uses an online editor.
-
-To run a sample using tiny-graphics.js, visit its GitHub Pages link: https://encyclopedia-of-code.github.io/tiny-graphics-js/
-
-To see all the demos and edit them:  Open the included "host.bat" or "host.command" file, then open localhost in your browser.  Open Developer Tools and create a workspace for your new folder.  Now you can edit the files, which is necessary to view the different demos.
-
-To select a demo, open and edit main-scene.js.  Assign your choice to the Main_Scene variable.  Your choices for scenes are:
-
-* Minimal_Webgl_Demo
-* Transforms_Sandbox
-* Axes_Viewer_Test_Scene
-* Inertia_Demo
-* Collision_Demo
-* Many_Lights_Demo
-* Obj_File_Demo
-* Text_Demo
-* Scene_To_Texture_Demo
-* Surfaces_Demo
-
-The code comments in each file should help, especially if you look at the definition of Transforms_Sandbox.  So should the explanations that the demos print on the page.  Enjoy!
+Contributions:
+    1. Justin Aoki - Normal/Bump Map, Particle Effects, Buttons
+    2. Ivana Chang - Build Scene, Animation, Buttons
+    3. Zachary McNelley - Create .obj files, Texture Lerp/Height Map
+    
